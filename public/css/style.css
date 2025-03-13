@@ -1,0 +1,47 @@
+/* public/css/style.css */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    padding-top: 50px;
+  }
+  
+  .card {
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .container {
+    max-width: 800px;
+  }
+  
+  .coupon-code {
+    font-size: 24px;
+    font-weight: bold;
+    padding: 10px 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #6c757d;
+    display: inline-block;
+    margin: 10px 0;
+  }
+  
+  .btn-primary {
+    background-color: #4361ee;
+    border-color: #4361ee;
+    padding: 10px 20px;
+  }
+  
+  .btn-primary:hover {
+    background-color: #3a56d4;
+    border-color: #3a56d4;
+  }
+  
+  .timer {
+    font-size: 18px;
+    color: #dc3545;
+    margin-top: 10px;
+  }
+  
+  .status-message {
+    margin-top: 20px;
+  }

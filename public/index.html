@@ -1,0 +1,48 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coupon Distribution System</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-10">
+        <div class="card">
+          <div class="card-header bg-primary text-white text-center">
+            <h2>Round-Robin Coupon Distribution</h2>
+          </div>
+          <div class="card-body text-center">
+            <p class="lead">Click the button below to claim your coupon</p>
+            
+            <div id="coupon-result" class="d-none">
+              <h4>Your Coupon:</h4>
+              <div class="coupon-code" id="coupon-code"></div>
+              <p>Use this coupon for your next purchase!</p>
+            </div>
+            
+            <div id="eligibility-status" class="status-message"></div>
+            
+            <button id="claim-button" class="btn btn-primary mt-3">
+              Claim Coupon
+            </button>
+            
+            <div id="timer-container" class="d-none">
+              <div class="timer" id="timer"></div>
+            </div>
+          </div>
+          <div class="card-footer text-center">
+            <p class="mb-0 text-muted">You can claim one coupon per hour</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
