@@ -12,6 +12,9 @@ const Coupon = require('./models/Coupon');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Enable trust proxy to get real IP addresses
+app.set('trust proxy', true);
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: {

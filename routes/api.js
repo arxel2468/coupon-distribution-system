@@ -65,9 +65,11 @@ const getNextCoupon = async () => {
 // Endpoint to claim a coupon
 router.post('/claim-coupon', [claimLimiter, validateClaimRequest], async (req, res) => {
   try {
-    console.log('Claim attempt from IP:', req.ip, 'BrowserId:', req.cookies.browserId || req.body.browserId);
-    const ipAddress = req.ip;
+    // Get the real client IP address
+    const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     const browserId = req.cookies.browserId || req.body.browserId;
+    
+    console.log('Claim attempt from IP:', ipAddress, 'BrowserId:', browserId);
     
     // Check eligibility
     const eligible = await isEligibleForCoupon(ipAddress, browserId);
