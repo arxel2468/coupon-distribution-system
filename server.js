@@ -27,6 +27,13 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.disable('x-powered-by');
+if (process.env.NODE_ENV === 'production') {
+    app.use((req, res, next) => {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    next();
+  });
+}
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/coupon-system', {
@@ -58,6 +65,17 @@ const seedCoupons = async () => {
     console.error('Error seeding coupons:', error);
   }
 };
+
+// Handle 404 errors
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+  });
+  
+  // Handle other errors
+  app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+  });
 
 // API routes
 app.use('/api', apiRoutes);

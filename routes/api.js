@@ -4,6 +4,8 @@ const router = express.Router();
 const Coupon = require('../models/Coupon');
 const Claim = require('../models/Claim');
 const { claimLimiter } = require('../middleware/rateLimiter');
+const { validateClaimRequest } = require('../middleware/validator');
+
 
 // Check if user is eligible for a coupon
 const isEligibleForCoupon = async (ipAddress, browserId) => {
@@ -61,7 +63,7 @@ const getNextCoupon = async () => {
 };
 
 // Endpoint to claim a coupon
-router.post('/claim-coupon', claimLimiter, async (req, res) => {
+router.post('/claim-coupon', [claimLimiter, validateClaimRequest], async (req, res) => {
   try {
     const ipAddress = req.ip;
     const browserId = req.cookies.browserId || req.body.browserId;
