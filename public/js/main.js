@@ -36,6 +36,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const data = await response.json();
         
         if (response.ok) {
+          // Store claim time in localStorage
+          localStorage.setItem('lastClaimTime', Date.now().toString());
+          
           // Show the coupon code
           couponCode.textContent = data.coupon.code;
           couponResult.classList.remove('d-none');
@@ -77,6 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
           // User is eligible to claim a coupon
           claimButton.disabled = false;
           timerContainer.classList.add('d-none');
+          localStorage.removeItem('lastClaimTime'); // Clear stored claim time
           
           if (!couponResult.classList.contains('d-none')) {
             eligibilityStatus.innerHTML = `<div class="alert alert-info">
@@ -88,16 +92,28 @@ document.addEventListener('DOMContentLoaded', function() {
           claimButton.disabled = true;
           timerContainer.classList.remove('d-none');
           
-          const minutesRemaining = data.minutesRemaining;
-          updateTimer(minutesRemaining);
+          // Get the stored claim time or use server-provided minutes
+          const lastClaimTime = parseInt(localStorage.getItem('lastClaimTime'));
+          let remainingSeconds;
+          
+          if (lastClaimTime) {
+            const elapsedSeconds = Math.floor((Date.now() - lastClaimTime) / 1000);
+            remainingSeconds = Math.max(0, 3600 - elapsedSeconds); // 3600 seconds = 1 hour
+          } else {
+            remainingSeconds = data.minutesRemaining * 60;
+            // Store the calculated claim time
+            localStorage.setItem('lastClaimTime', (Date.now() - ((3600 - remainingSeconds) * 1000)).toString());
+          }
           
           // Clear any existing interval
           if (countdownInterval) {
             clearInterval(countdownInterval);
           }
           
+          // Update timer immediately
+          updateTimerDisplay(remainingSeconds);
+          
           // Start countdown timer
-          let remainingSeconds = minutesRemaining * 60;
           countdownInterval = setInterval(() => {
             remainingSeconds--;
             
@@ -105,9 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
               clearInterval(countdownInterval);
               checkEligibility();
             } else {
-              const minutes = Math.floor(remainingSeconds / 60);
-              const seconds = remainingSeconds % 60;
-              timerElement.textContent = `You can claim another coupon in: ${minutes}m ${seconds}s`;
+              updateTimerDisplay(remainingSeconds);
             }
           }, 1000);
         }
@@ -120,7 +134,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Update timer display
-    function updateTimer(minutesRemaining) {
-      timerElement.textContent = `You can claim another coupon in: ${minutesRemaining}m 0s`;
+    function updateTimerDisplay(remainingSeconds) {
+      const minutes = Math.floor(remainingSeconds / 60);
+      const seconds = remainingSeconds % 60;
+      timerElement.textContent = `You can claim another coupon in: ${minutes}m ${seconds}s`;
     }
-  });
+});
