@@ -6,13 +6,7 @@ const couponSchema = new mongoose.Schema({
     type: String, 
     required: true, 
     unique: true 
-  },
-  isAssigned: { 
-    type: Boolean, 
-    default: false 
-  },
-  assignedAt: Date,
-  assignedTo: String
+  }
 });
 
 module.exports = mongoose.model('Coupon', couponSchema);

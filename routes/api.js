@@ -34,32 +34,34 @@ const isEligibleForCoupon = async (ipAddress, browserId) => {
 
 // Get the next available coupon in round-robin fashion
 const getNextCoupon = async () => {
-  // Find the first unassigned coupon
-  const coupon = await Coupon.findOne({ isAssigned: false });
+  // Get all coupons sorted by code
+  const allCoupons = await Coupon.find().sort({ code: 1 });
   
-  if (!coupon) {
-    // If all coupons are assigned, reset the oldest one
-    const oldestClaim = await Claim.findOne().sort({ claimedAt: 1 });
-    
-    if (oldestClaim) {
-      const couponToReset = await Coupon.findById(oldestClaim.couponId);
-      if (couponToReset) {
-        // Reset the coupon for reuse
-        couponToReset.isAssigned = false;
-        couponToReset.assignedAt = null;
-        couponToReset.assignedTo = null;
-        await couponToReset.save();
-        
-        // Remove the claim
-        await Claim.deleteOne({ _id: oldestClaim._id });
-        
-        return couponToReset;
-      }
-    }
+  if (!allCoupons.length) {
     return null;
   }
+
+  // Get the most recent claim
+  const lastClaim = await Claim.findOne().sort({ claimedAt: -1 });
   
-  return coupon;
+  if (!lastClaim) {
+    // If no claims exist, return the first coupon
+    return allCoupons[0];
+  }
+
+  // Find the last assigned coupon
+  const lastAssignedCoupon = await Coupon.findById(lastClaim.couponId);
+  if (!lastAssignedCoupon) {
+    return allCoupons[0];
+  }
+
+  // Find the index of the last assigned coupon
+  const currentIndex = allCoupons.findIndex(c => c.code === lastAssignedCoupon.code);
+  
+  // Get the next coupon (wrap around to the beginning if at the end)
+  const nextIndex = (currentIndex + 1) % allCoupons.length;
+  
+  return allCoupons[nextIndex];
 };
 
 // Endpoint to claim a coupon
@@ -95,12 +97,6 @@ router.post('/claim-coupon', [claimLimiter, validateClaimRequest], async (req, r
     if (!coupon) {
       return res.status(404).json({ error: 'No coupons available at this time.' });
     }
-    
-    // Update the coupon
-    coupon.isAssigned = true;
-    coupon.assignedAt = new Date();
-    coupon.assignedTo = `${ipAddress}-${browserId || 'noBrowserId'}`;
-    await coupon.save();
     
     // Record the claim
     await Claim.create({
