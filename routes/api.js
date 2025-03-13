@@ -65,6 +65,7 @@ const getNextCoupon = async () => {
 // Endpoint to claim a coupon
 router.post('/claim-coupon', [claimLimiter, validateClaimRequest], async (req, res) => {
   try {
+    console.log('Claim attempt from IP:', req.ip, 'BrowserId:', req.cookies.browserId || req.body.browserId);
     const ipAddress = req.ip;
     const browserId = req.cookies.browserId || req.body.browserId;
     
@@ -124,6 +125,7 @@ router.post('/claim-coupon', [claimLimiter, validateClaimRequest], async (req, r
       }
     });
   } catch (error) {
+    console.log('Error claiming coupon:', error);
     console.error('Error claiming coupon:', error);
     res.status(500).json({ error: 'Failed to claim coupon' });
   }

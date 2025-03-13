@@ -28,18 +28,16 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.disable('x-powered-by');
+
 if (process.env.NODE_ENV === 'production') {
-    app.use((req, res, next) => {
+  app.use((req, res, next) => {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     next();
   });
 }
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/coupon-system', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/coupon-system')
 .then(() => {
   console.log('MongoDB connected');
   seedCoupons(); // Seed coupons after connection is established
@@ -66,23 +64,23 @@ const seedCoupons = async () => {
   }
 };
 
-// Handle 404 errors
-app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
-  });
-  
-  // Handle other errors
-  app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
-  });
-
-// API routes
+// API routes - DEFINE THESE BEFORE THE 404 HANDLER
 app.use('/api', apiRoutes);
 
 // Serve the main HTML file
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Handle 404 errors - NOW THIS COMES AFTER THE ROUTES
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+});
+
+// Handle other errors
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
 });
 
 // Start the server
