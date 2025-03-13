@@ -4,14 +4,20 @@ This web application distributes coupons to users in a round-robin manner, with 
 
 ## Features
 
-- **Round-Robin Distribution**: Coupons are assigned sequentially to ensure even distribution
+- **True Round-Robin Distribution**: 
+  - Coupons are distributed in a fixed sequence (e.g., SAVE10 → FREE15 → DISCOUNT20 → SPECIAL25 → DEAL30)
+  - Each new claim gets the next coupon in sequence
+  - When all coupons are used, the sequence starts over
 - **Guest Access**: No login required to claim coupons
 - **Multi-layered Abuse Prevention**:
   - IP address tracking (prevents multiple claims from same network)
   - Browser fingerprinting (prevents multiple claims from same device)
   - Rate limiting (restricts number of requests per time period)
   - Time-based restrictions (one coupon claim per hour)
-- **User Feedback**: Clear messaging and countdown timer for eligibility
+- **Enhanced User Feedback**: 
+  - Clear success/error messaging
+  - Persistent countdown timer (continues accurately even after page refresh)
+  - Real-time eligibility updates
 - **Responsive Design**: Works on desktop and mobile devices
 
 ## Technology Stack
@@ -75,6 +81,7 @@ The application implements multiple layers of protection against abuse:
 1. **IP Address Tracking**:
    - Each coupon claim is associated with the user's IP address
    - Users cannot claim multiple coupons from the same IP address within the restricted time frame
+   - Note: Users behind the same NAT (e.g., same WiFi network) will share the same IP address
 
 2. **Browser Fingerprinting**:
    - A unique browser ID is generated and stored in localStorage
@@ -87,12 +94,15 @@ The application implements multiple layers of protection against abuse:
 
 4. **Time-based Restrictions**:
    - Users must wait one hour between coupon claims
-   - A countdown timer shows the remaining wait time
+   - Persistent countdown timer shows the exact remaining wait time
+   - Timer continues accurately even after page refresh
    - Both IP and browser ID are checked against the time restriction
 
 5. **Round-Robin Distribution**:
-   - Ensures fair distribution of coupons
-   - When all coupons are claimed, the system reuses the oldest claimed coupon
+   - Ensures fair and predictable distribution of coupons
+   - Coupons are assigned in a fixed sequence
+   - Available coupons: SAVE10, FREE15, DISCOUNT20, SPECIAL25, DEAL30
+   - Example: If User A gets SAVE10, User B will get FREE15, User C will get DISCOUNT20, etc.
 
 ## Testing
 
@@ -101,14 +111,31 @@ To test the abuse prevention mechanisms:
 1. Claim a coupon normally
 2. Try to claim another coupon within the hour (should be prevented)
 3. Try using a different browser (should still be prevented due to IP tracking)
-4. If using a VPN to change IP, the browser fingerprinting should still prevent multiple claims
+4. Try using a different device on the same network (should still be prevented due to shared IP)
+5. Wait for the countdown timer to complete (should allow new claim)
+6. Note: Testing with different IPs requires actually using different networks (WiFi vs Mobile data)
 
 ## API Endpoints
 
 - `POST /api/claim-coupon`: Claim a coupon
+  - Request body: `{ browserId: string }`
+  - Response: `{ success: boolean, message: string, coupon?: { code: string } }`
+
 - `GET /api/check-eligibility`: Check if user is eligible to claim a coupon
+  - Query params: `browserId`
+  - Response: `{ eligible: boolean, minutesRemaining?: number }`
+
 - `GET /api/coupons`: List all coupons (for administrative purposes)
+  - Response: `Array<{ code: string }>`
 
 ## License
 
 [ISC License](LICENSE)
+
+## Notes
+
+- The system uses both IP address and browser fingerprinting for abuse prevention
+- Users on the same network (same public IP) will be treated as the same user
+- For testing multiple users, use different networks (e.g., WiFi vs Mobile data)
+- The countdown timer is persistent and accurate across page refreshes
+- Each coupon code is distributed exactly once before the sequence repeats
